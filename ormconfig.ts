@@ -1,18 +1,52 @@
 import type { DataSourceOptions } from "typeorm";
 
-const dbConfig: DataSourceOptions = {
-  type: "sqlite",
-  database: "mydb.sqlite",
-  entities: ["**/*.entity.ts"],
-  logging: ["query", "migration", "error"],
-  entitySkipConstructor: true,
+const dbConfig: Partial<DataSourceOptions> = {
   entityPrefix: "",
-  synchronize: false,
-  dropSchema: false,
+  entitySkipConstructor: true,
   migrationsTableName: "app_migrations",
-  migrationsRun: false,
-  metadataTableName: "typeorm-metas",
-  migrations: ["migrations/*.ts"]
+  metadataTableName: "typeorm-metas"
 };
 
-export default dbConfig;
+switch (process.env.NODE_ENV) {
+  case "production":
+    Object.assign(dbConfig, {
+      type: "postgres",
+      host: "127.0.0.1",
+      port: 5432,
+      username: "postgres",
+      password: "",
+      database: "mydb",
+      entities: ["**/*.entity.js"],
+      logging: false,
+      migrations: ["migrations/*.js"]
+    } as DataSourceOptions);
+    break;
+
+  case "development":
+    Object.assign(dbConfig, {
+      type: "sqlite",
+      database: "mydb.sqlite",
+      entities: ["**/*.entity.ts"],
+      logging: ["query", "migration", "error"],
+      synchronize: true,
+      dropSchema: true,
+      migrations: ["migrations/*.ts"]
+    } as DataSourceOptions);
+    break;
+
+  case "testing":
+    Object.assign(dbConfig, {
+      type: "sqlite",
+      database: "test.sqlite",
+      entities: ["**/*.entity.ts"],
+      logging: false,
+      migrations: ["migrations/*.ts"],
+      migrationsRun: true
+    } as DataSourceOptions);
+    break;
+
+  default:
+    throw new Error("Unknown Env type.");
+}
+
+export default dbConfig as DataSourceOptions;
