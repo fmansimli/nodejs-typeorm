@@ -12,10 +12,10 @@ export const login: RequestHandler = async (req, res, next) => {
 };
 
 export const register: RequestHandler = async (req, res, next) => {
-  const { email, password, username }: User = req.body;
+  const { email, password }: User = req.body;
 
   try {
-    res.status(200).json({ email, password, username });
+    res.status(200).json({ email, password });
   } catch (error) {
     next(error);
   }

@@ -29,7 +29,7 @@ switch (process.env.NODE_ENV) {
       entities: ["**/*.entity.ts"],
       logging: ["query", "migration", "error"],
       synchronize: true,
-      dropSchema: true,
+      dropSchema: false,
       migrations: ["migrations/*.ts"]
     } as DataSourceOptions);
     break;

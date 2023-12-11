@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable } from "typeorm";
 import { User } from "./user.entity";
+import { Category } from "./category.entity";
 
 @Entity("posts")
 export class Post {
-  constructor(attrs: Partial<Post>) {
-    Object.assign(this, attrs);
+  constructor(attrs?: Partial<Post>) {
+    Object.assign(this, attrs || {});
   }
 
   @PrimaryGeneratedColumn()
@@ -21,7 +22,13 @@ export class Post {
 
   @ManyToOne(() => User, (user) => user.posts, {
     onDelete: "CASCADE",
-    nullable: true
+    cascade: ["insert", "update"]
   })
-  user: User;
+  public user: User;
+
+  @ManyToMany(() => Category, (category) => category.posts, {
+    cascade: ["insert", "update"]
+  })
+  @JoinTable()
+  public categories: Category[];
 }

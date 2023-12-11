@@ -1,19 +1,13 @@
 import type { RequestHandler } from "express";
 import { AppDataSource } from "../data-source";
-import { NotFoundError } from "../errors";
+import { Category } from "../entities";
 
-import { Post, Category } from "../entities";
-import { CreatePostDto } from "../validations/create-post.dto";
-
-const repo = AppDataSource.getRepository(Post);
+const categoryRepo = AppDataSource.getRepository(Category);
 
 export const getAll: RequestHandler = async (req, res, next) => {
   try {
-    const [posts, count] = await repo.findAndCount({
-      relations: { categories: true }
-    });
-
-    res.status(200).json({ posts, meta: { count } });
+    const [categories, count] = await categoryRepo.findAndCount();
+    res.status(200).json({ categories, count });
   } catch (error) {
     next(error);
   }
@@ -21,32 +15,19 @@ export const getAll: RequestHandler = async (req, res, next) => {
 
 export const getById: RequestHandler = async (req, res, next) => {
   try {
-    const id = +req.params.id;
-
-    const post = await repo.findOne({
-      where: { id },
-      relations: { user: true }
-    });
-
-    if (!post) {
-      throw new NotFoundError("post not found.");
-    }
-
-    res.status(200).json({ post });
+    res.status(200).json({});
   } catch (error) {
     next(error);
   }
 };
 
 export const create: RequestHandler = async (req, res, next) => {
-  const { body, title, categories } = req.body as CreatePostDto;
+  const { name, desc } = (req.body as Category) || {};
   try {
-    const ctgs = categories.map((c) => new Category({ id: c }));
+    const category = new Category({ name, desc });
+    await categoryRepo.save(category);
 
-    const post = new Post({ body, title, categories: ctgs });
-    await repo.save(post);
-
-    res.status(201).json(post);
+    res.status(201).json(category);
   } catch (error) {
     next(error);
   }
